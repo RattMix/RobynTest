@@ -1,0 +1,59 @@
+> library(Robyn)
+> 
+> # --- Load built-in demo data ---
+> data("dt_simulated_weekly")
+> data("dt_prophet_holidays")
+> 
+> # --- Select existing variables ---
+> paid_media_spends <- intersect(
++   c("tv_S","ooh_S","print_S","search_S","facebook_S"),
++   names(dt_simulated_weekly)
++ )
+> context_vars <- intersect(
++   c("competitor_sales_B"),
++   names(dt_simulated_weekly)
++ )
+> 
+> # --- Build model inputs (hyperparameters included here) ---
+> inputs <- robyn_inputs(
++   dt_input          = dt_simulated_weekly,
++   dt_holidays       = dt_prophet_holidays,
++   date_var          = "DATE",
++   dep_var           = "revenue",
++   dep_var_type      = "revenue",
++   prophet_vars      = c("trend","season","weekday","holiday"),
++   prophet_country   = "GB",
++   paid_media_spends = paid_media_spends,
++   context_vars      = context_vars,
++   adstock           = "geometric",
++   hyperparameters   = list(
++     theta   = c(0, 0.9),     # adstock decay
++     alpha   = c(0.1, 3),     # saturation curve
++     gamma   = c(0.3, 1),     # slope of curve
++     lambda  = c(0, 1),       # ridge regularisation
++     train_size = c(0.5, 0.8) # training-data proportion
++   )
++ )
+Error in check_hyperparameters(hyperparameters, adstock, paid_collect$paid_media_selected,  : 
+  Input 'hyperparameters' contains following wrong names: alpha, gamma, theta
+> 
+> # --- Run Robyn model search (quick demo) ---
+> model <- robyn_run(
++   robyn_object = inputs,
++   trials       = 5,
++   iterations   = 200,
++   cores        = 2
++ )
+Error in robyn_run(robyn_object = inputs, trials = 5, iterations = 200,  : 
+  Must provide 'hyperparameters' in robyn_inputs()'s output first
+> 
+> # --- View results ---
+> out <- robyn_outputs(model)
+Error: object 'model' not found
+> 
+> # --- Optional: open budget allocator ---
+> alloc <- robyn_allocator(out, ui = TRUE)
+>>> Running budget allocator for model ID  ...
+Error in order(paid_media_selected) : argument 1 is not a vector
+> 
+> 
