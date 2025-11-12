@@ -11,6 +11,7 @@ paid_media_spends <- intersect(
   c("tv_S", "ooh_S", "print_S", "search_S", "facebook_S"),
   names(dt_simulated_weekly)
 )
+paid_media_vars <- paid_media_spends
 context_vars <- intersect(
   "competitor_sales_B",
   names(dt_simulated_weekly)
@@ -41,11 +42,16 @@ inputs <- robyn_inputs(
   dep_var_type      = "revenue",
   prophet_vars      = c("trend", "season", "weekday", "holiday"),
   prophet_country   = "GB",
+  paid_media_vars   = paid_media_vars,
   paid_media_spends = paid_media_spends,
   context_vars      = context_vars,
   adstock           = "geometric",
   hyperparameters   = hyperparameters
 )
+
+if (is.null(inputs$hyperparameters)) {
+  inputs$hyperparameters <- hyperparameters
+}
 
 # Run a small test model
 model <- robyn_run(
