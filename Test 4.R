@@ -34,7 +34,7 @@ hyperparameters <- c(
 )
 
 # Build inputs
-inputs <- robyn_inputs(
+InputCollect <- robyn_inputs(
   dt_input          = dt_simulated_weekly,
   dt_holidays       = dt_prophet_holidays,
   date_var          = "DATE",
@@ -45,17 +45,15 @@ inputs <- robyn_inputs(
   paid_media_vars   = paid_media_vars,
   paid_media_spends = paid_media_spends,
   context_vars      = context_vars,
-  adstock           = "geometric",
-  hyperparameters   = hyperparameters
+  adstock           = "geometric"
 )
 
-if (is.null(inputs$hyperparameters)) {
-  inputs$hyperparameters <- hyperparameters
-}
+# Attach hyperparameters explicitly for robyn_run()
+InputCollect$hyperparameters <- hyperparameters
 
 # Run a small test model
 model <- robyn_run(
-  robyn_object = inputs,
+  robyn_object = InputCollect,
   trials       = 3,
   iterations   = 200,
   cores        = max(1, parallel::detectCores(logical = FALSE) - 1)
@@ -66,4 +64,3 @@ out <- robyn_outputs(model)
 print(out$summary)
 robyn_write(out, dir = getwd())
 message("Robyn demo completed successfully.")
-
