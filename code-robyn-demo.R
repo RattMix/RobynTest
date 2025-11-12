@@ -1,28 +1,30 @@
-# robyn_demo.R — minimal demo that runs on Robyn 3.12.1
+# code-robyn-demo.R — reproducible Robyn demo script
 
 suppressPackageStartupMessages(library(Robyn))
 
-# Load built-in demo data
+# Load built-in demo data -------------------------------------------------------
 if (!exists("dt_simulated_weekly")) data("dt_simulated_weekly")
 if (!exists("dt_prophet_holidays")) data("dt_prophet_holidays")
 
-# Select columns that exist in the demo data
+dataset_cols <- names(dt_simulated_weekly)
+
 paid_media_spends <- intersect(
   c("tv_S", "ooh_S", "print_S", "search_S", "facebook_S"),
-  names(dt_simulated_weekly)
+  dataset_cols
 )
 paid_media_vars <- paid_media_spends
-context_vars <- intersect(
-  "competitor_sales_B",
-  names(dt_simulated_weekly)
-)
+context_vars <- intersect("competitor_sales_B", dataset_cols)
 
-# Create channel-level hyperparameters
+if (length(paid_media_spends) == 0) {
+  stop("No paid media spend columns were found in dt_simulated_weekly.")
+}
+
+# Hyperparameter grid -----------------------------------------------------------
 channel_hypers <- list()
-for (ch in paid_media_spends) {
-  channel_hypers[[sprintf("%s_thetas", ch)]] <- c(0, 0.9)
-  channel_hypers[[sprintf("%s_alphas", ch)]] <- c(0.1, 3)
-  channel_hypers[[sprintf("%s_gammas", ch)]] <- c(0.3, 1)
+for (channel in paid_media_spends) {
+  channel_hypers[[sprintf("%s_thetas", channel)]] <- c(0, 0.9)
+  channel_hypers[[sprintf("%s_alphas", channel)]] <- c(0.1, 3)
+  channel_hypers[[sprintf("%s_gammas", channel)]] <- c(0.3, 1)
 }
 
 hyperparameters <- c(
@@ -33,7 +35,7 @@ hyperparameters <- c(
   )
 )
 
-# Build inputs
+# Build input object ------------------------------------------------------------
 InputCollect <- robyn_inputs(
   dt_input          = dt_simulated_weekly,
   dt_holidays       = dt_prophet_holidays,
@@ -48,10 +50,9 @@ InputCollect <- robyn_inputs(
   adstock           = "geometric"
 )
 
-# Attach hyperparameters explicitly for robyn_run()
 InputCollect$hyperparameters <- hyperparameters
 
-# Run a small test model
+# Run a lightweight model -------------------------------------------------------
 model <- robyn_run(
   robyn_object = InputCollect,
   trials       = 3,
@@ -59,8 +60,9 @@ model <- robyn_run(
   cores        = max(1, parallel::detectCores(logical = FALSE) - 1)
 )
 
-# Collect and print outputs
-out <- robyn_outputs(model)
-print(out$summary)
-robyn_write(out, dir = getwd())
+# Summarise results -------------------------------------------------------------
+outputs <- robyn_outputs(model)
+print(outputs$summary)
+robyn_write(outputs, dir = getwd())
+
 message("Robyn demo completed successfully.")
