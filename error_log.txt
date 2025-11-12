@@ -1,0 +1,7 @@
+6: stop("Must provide 'hyperparameters' in robyn_inputs()'s output first")
+5: robyn_run(robyn_object = inputs, trials = 3, iterations = 200, 
+       cores = max(1, parallel::detectCores(logical = FALSE) - 1)) at Test 4.R#51
+4: eval(ei, envir)
+3: eval(ei, envir)
+2: withVisible(eval(ei, envir))
+1: source("~/Documents/Robyn/GitHub/RobynTest/Test 4.R")

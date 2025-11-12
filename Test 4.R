@@ -60,3 +60,4 @@ out <- robyn_outputs(model)
 print(out$summary)
 robyn_write(out, dir = getwd())
 message("Robyn demo completed successfully.")
+
